@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - dist:/app/dist
+    ports:
+      - "8080:8080"
+    # uncomment command below to run development version
+    # command: "npm run serve"
+    command: npm install && npm run serve
+
+
+volumes:
+  node_modules:
+  dist:

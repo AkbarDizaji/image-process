@@ -1,0 +1,41 @@
+version: '3'
+services:
+  app:
+    build:
+      context: image-processing-app
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=image-process
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=123456
+    command: >
+      sh -c "composer install &&
+             php artisan key:generate &&
+             php artisan migrate &&
+             php -S 0.0.0.0:8000 -t public &&
+             php artisan queue:work --daemon &&
+             composer require intervention/image"
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=image-process
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  vue:
+    build:
+      context: image-processing-ui
+      dockerfile: Dockerfile
+    ports:
+      - 8090:8080
+    depends_on:
+      - app
+volumes:
+  postgres-data:
